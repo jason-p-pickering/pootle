@@ -52,6 +52,7 @@ from .diff import StoreDiff
 from .fields import (PLURAL_PLACEHOLDER, SEPARATOR, MultiStringField,
                      TranslationStoreField)
 from .filetypes import factory_classes
+from .store.deserialize import StoreDeserializer
 from .store.serialize import StoreSerializer
 from .util import (
     FUZZY, OBSOLETE, TRANSLATED, UNTRANSLATED, get_change_str,
@@ -1750,6 +1751,9 @@ class Store(models.Model, CachedTreeItem, base.TranslationStore):
             count += 1
 
         return count
+
+    def deserialize(self, data):
+        self.update(StoreDeserializer(self).deserialize(data))
 
     def serialize(self):
         return StoreSerializer(self).serialize()

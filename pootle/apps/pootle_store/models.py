@@ -52,6 +52,7 @@ from .diff import StoreDiff
 from .fields import (PLURAL_PLACEHOLDER, SEPARATOR, MultiStringField,
                      TranslationStoreField)
 from .filetypes import factory_classes
+from .store.serialize import StoreSerializer
 from .util import (
     FUZZY, OBSOLETE, TRANSLATED, UNTRANSLATED, get_change_str,
     vfolders_installed)
@@ -1751,26 +1752,7 @@ class Store(models.Model, CachedTreeItem, base.TranslationStore):
         return count
 
     def serialize(self):
-        from django.core.cache import caches
-
-        cache = caches["exports"]
-        rev = self.get_max_unit_revision()
-        path = self.pootle_path
-
-        ret = cache.get(path, version=rev)
-        if not ret:
-            storeclass = self.get_file_class()
-            store = self.convert(storeclass)
-            if hasattr(store, "updateheader"):
-                # FIXME We need those headers on import
-                # However some formats just don't support setting metadata
-                store.updateheader(add=True, X_Pootle_Path=path)
-                store.updateheader(add=True, X_Pootle_Revision=rev)
-
-            ret = str(store)
-            cache.set(path, ret, version=rev)
-
-        return ret
+        return StoreSerializer(self).serialize()
 
     def sync(self, update_structure=False, conservative=True,
              user=None, skip_missing=False, only_newer=True):

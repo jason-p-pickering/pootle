@@ -211,6 +211,18 @@ class Project(models.Model, CachedTreeItem, ProjectURLMixin):
 
     disabled = models.BooleanField(verbose_name=_('Disabled'), default=False)
 
+    # Comma-separated pipeline of de/serializers for Stores across a Project
+    deserializers = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_("Deserializers"))
+    serializers = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name=_("Serializers"))
+
     objects = ProjectManager()
 
     class Meta(object):

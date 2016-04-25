@@ -7,7 +7,10 @@
 # AUTHORS file for copyright and authorship information.
 
 
-from pootle.core.plugin.delegate import Getter
+from pootle.core.plugin.delegate import Getter, Provider
 
 
 search_backend = Getter(providing_args=["instance"])
+
+serializers = Provider(providing_args=["instance"])
+deserializers = Provider(providing_args=["instance"])

@@ -6,6 +6,7 @@
 # or later license. See the LICENSE file for a copy of the license and the
 # AUTHORS file for copyright and authorship information.
 
+import io
 import os
 import shutil
 import time
@@ -510,3 +511,113 @@ def test_store_repr():
     store = Store.objects.first()
     assert str(store) == str(store.convert(store.get_file_class()))
     assert repr(store) == u"<Store: %s>" % store.pootle_path
+
+
+@pytest.mark.django_db
+def test_store_po_deserializer(test_fs, store_po):
+
+    with test_fs.open("data/po/complex.po") as test_file:
+        test_string = test_file.read()
+        ttk_po = getclass(test_file)(test_string)
+
+    store_po.deserialize(test_string)
+    assert len(ttk_po.units) - 1 == store_po.units.count()
+
+
+@pytest.mark.django_db
+def test_store_po_serializer(test_fs, store_po):
+
+    with test_fs.open("data/po/complex.po") as test_file:
+        test_string = test_file.read()
+        ttk_po = getclass(test_file)(test_string)
+
+    store_po.deserialize(test_string)
+    store_io = io.BytesIO(store_po.serialize().encode("utf8"))
+    store_ttk = getclass(store_io)(store_io.read())
+    assert len(store_ttk.units) == len(ttk_po.units)
+
+
+@pytest.mark.django_db
+def test_store_po_serializer_custom(test_fs, store_po):
+
+    from pootle.core.delegate import serializers
+    from pootle.core.plugin import provider
+
+    class SerializerCheck(object):
+        serializer_was_called = False
+        input_is_unicode = False
+
+    checker = SerializerCheck()
+
+    class EGSerializer(object):
+
+        def __init__(self, store, data):
+            self.store = store
+            self.original_data = data
+
+        @property
+        def output(self):
+            checker.serializer_was_called = True
+            checker.input_is_unicode = isinstance(
+                self.original_data, unicode)
+
+    @provider(serializers)
+    def provide_serializers(**kwargs):
+        return dict(eg_serializer=EGSerializer)
+
+    with test_fs.open("data/po/complex.po") as test_file:
+        test_string = test_file.read()
+        # ttk_po = getclass(test_file)(test_string)
+    store_po.deserialize(test_string)
+
+    # add config to the project
+    project = store_po.translation_project.project
+    project.serializers = "eg_serializer"
+    project.save()
+
+    store_po.serialize()
+    assert checker.serializer_was_called is True
+    assert checker.input_is_unicode is True
+
+
+@pytest.mark.django_db
+def test_store_po_deserializer_custom(test_fs, store_po):
+
+    from pootle.core.delegate import deserializers
+    from pootle.core.plugin import provider
+
+    class DeserializerCheck(object):
+        deserializer_was_called = False
+        input_is_unicode = False
+
+    checker = DeserializerCheck()
+
+    class EGDeserializer(object):
+
+        def __init__(self, store, data):
+            self.store = store
+            self.original_data = data
+
+        @property
+        def output(self):
+            checker.deserializer_was_called = True
+            checker.input_is_unicode = isinstance(
+                self.original_data, unicode)
+            return self.original_data
+
+    @provider(deserializers)
+    def provide_deserializers(**kwargs):
+        return dict(eg_deserializer=EGDeserializer)
+
+    with test_fs.open("data/po/complex.po") as test_file:
+        test_string = test_file.read()
+
+    # add config to the project
+    project = store_po.translation_project.project
+    project.deserializers = "eg_deserializer"
+    project.save()
+
+    store_po.deserialize(test_string)
+
+    assert checker.deserializer_was_called is True
+    assert checker.input_is_unicode is True

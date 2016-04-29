@@ -316,6 +316,61 @@ directly on the file system.
    deleted from the database. Handle with care!
 
 
+.. django-admin:: project_serializers
+
+project_serializers
+^^^^^^^^^^^^^^^^^^^
+
+  .. versionadded:: 2.8.0
+
+Allows you to manage and set project serializers and deserializers for your
+projects.
+
+Any serializers or deserializers that you wish to specify should be installed
+in your system. You can list installed serializers and deserializers using
+the ``--list`` param. For further information about writing your own 
+serializers and deserializers, please see the
+:ref:`relevant developer documentation <serializers>`
+
+Any projects that have been configured to use a serializer or deserializer
+will pass the data through the configured functions when serializing or
+deserializing ``Stores`` within the ``Project`` to and from disk or when
+importing or exporting data.
+
+If not options are passed, the command will display the current configuration
+for each ``Project`` on your site. If called with the ``code`` of a ``Project``,
+it will print the configuration for only that ``Project``.
+
+Available options:
+
+.. django-admin-option:: --list
+
+  List available serializers and deserializers set up for our system.
+
+.. django-admin-option:: --set-serializers
+
+  This option must be called with a comma-separated string containing
+  the names of valid serializers installed on your server. Calling
+  ``project_serializers`` with this option also requires a ``Project``
+  positional argument.
+
+.. django-admin-option:: --set-deserializers
+
+  This option must be called with a comma-separated string containing
+  the names of valid deserializers installed on your server. Calling
+  ``project_serializers`` with this option also requires a ``Project``
+  positional argument.
+
+.. django-admin-option:: --clear-serializers
+
+  This option will clear the serializers for a given ``Project``.
+
+.. django-admin-option:: --clear-deserializers
+
+  This option will clear the deserializers for a given ``Project``.
+
+
+
 .. django-admin:: list_languages
 
 list_languages

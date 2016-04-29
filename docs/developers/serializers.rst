@@ -58,7 +58,7 @@ the result differently, then a matching deserializer will likely be required.
 .. _serializers#custom-deserializer:
 
 Adding a custom deserializer
---------------------------
+----------------------------
 
 Lets add a `CustomDeserializer` in a file called `deserializers.py`.
 

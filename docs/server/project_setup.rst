@@ -4,19 +4,23 @@ Create a Project
 ================
 
 Now that you have the server up and running, this guide will help you get
-started with Pootle setup for getting translations.
+started with additional steps which will enable translations on the Pootle
+server.
 
 
 Assumptions
 -----------
 
-- We are setting up a project which consists of PO files and you have them on
-  hand.
-- You have a POT file with the strings you want to get translated.
-- The files are using the GNU layout, more about that later.
+- You are setting up a project which consists of PO files which can be 
+copied to the same server which is running Pootle.
+- You have a template file in POT which contains the strings 
+which need to be translated. 
+- The files are using the GNU layout. Additional information on this layout
+format will be discussed in a later section. 
 - Pootle is correctly set up and running.
-- There is at least some **rqworker** running. This is important.
-- You are logged in using your newly created administrator user.
+- There is at least one **rqworker** thread running. This is important.
+- You are logged into the Pootle instance 
+using your newly created administrator user.
 
 
 .. _project_setup#add-new-project:
@@ -30,7 +34,7 @@ Adding a new project
 Place translation files
 +++++++++++++++++++++++
 
-First task is to place the translation files for your new project in a location
+The first task is to place the translation files for your new project in a location
 where Pootle can find, write and read them. Pootle is told about this location
 by using the :setting:`POOTLE_TRANSLATION_DIRECTORY` setting.
 
@@ -41,11 +45,12 @@ by using the :setting:`POOTLE_TRANSLATION_DIRECTORY` setting.
    difficult for you to find depending on how you installed Pootle.
 
 
-As told above, we will be using a GNU layout for the examples. A GNU layout
-means that a given project contains only translation files named by its
-language code. That means that within that project there are no directories,
-just files. This is the simplest layout possible. Below you can see an example
-with two projects using the GNU layout:
+As described  in the section above, for this example we will use a GNU layout. 
+A GNU layoutmeans that a given project contains only translation files 
+named by its language code. That means that within that 
+project there are no directories, just files. 
+This is the simplest layout possible. Below you can see an examplewith two
+projects using the GNU layout:
 
 ::
 
@@ -65,15 +70,16 @@ with two projects using the GNU layout:
 
 
 You might have noticed that among the regular translation files there are two
-files named :file:`templates.pot`. These are the master files that contain the
-original strings. Usually these master files contain English strings, but we
-find much less confusing to use ``templates`` instead of ``en`` (language code
-for English).
+files named :file:`templates.pot`. These are the master (template) files 
+that contain the original strings. Usually these master files contain English
+strings, but we find much less confusing to use ``templates`` 
+instead of ``en`` (language code for English). It is also possible to provide
+a descriptive name for the template, such as `project1.pot`. 
 
-Create a :file:`my-project` directory in the location pointed to by
-:setting:`POOTLE_TRANSLATION_DIRECTORY` and place within it the translation
-files for your new project. Make sure you have a :file:`templates.pot` among
-those project translation files.
+To get started, create a :file:`my-project` directory in the 
+location pointed to by :setting:`POOTLE_TRANSLATION_DIRECTORY` and place
+within it the translation files for your new project. Make sure you 
+have a :file:`templates.pot` among those project translation files.
 
 
 .. _project_setup#create-new-project:
@@ -81,7 +87,7 @@ those project translation files.
 Creating the project
 ++++++++++++++++++++
 
-In the top side of the interface you should see your newly created
+At the top of the user interface, you should see your newly created
 administrator username. Click on it and the main top menu will be displayed,
 and then click on **Admin** item (highlighted in red):
 
@@ -95,7 +101,7 @@ will see a **New Project** button:
 
 
 Click on that button and the **Add Project** form will be presented to you.
-Fill it with the new project details. **Code** must match the name for the
+Fill it with the new project details. **Code** must match the name of the
 directory within :setting:`POOTLE_TRANSLATION_DIRECTORY` that contains the new
 project translation files, in our example :file:`my-project`. You can also
 provide a **Full Name** easily readable for humans. You don't need to change
@@ -104,9 +110,10 @@ the rest of the fields unless you need to further customize your project.
 .. image:: ../_static/add_project_form.png
 
 
-Once you are done click on the **Save** button below the form to create the
-project. Creating the project doesn't actually import all the translations to
-Pootle, so you also need to run :djadmin:`update_stores`:
+Once you filled in all information in this screen, click on the **Save** button 
+below the form to create theproject. Creating the project doesn't actually
+import all the translations to Pootle, so you also need to execute the command
+:djadmin:`update_stores`: on the command line of the Pootle server.
 
 .. code-block:: console
 
@@ -127,7 +134,7 @@ Your main reason for using Pootle probably is to get something translated to as
 many languages as possible in a simple way. So you will usually be enabling the
 translation to new languages in your project.
 
-To enable translating your project to a new language go to your project
+To enable translating your project to a new language, go to your project
 overview. Then select the **Languages** item in the navigation dropdown and
 click on it:
 
@@ -143,13 +150,13 @@ click on it:
 
 You are presented with a form listing all the existing languages. Here you can
 add a new language. In this example the **Arabic** language is selected to be
-enabled:
+enabled for the selected project:
 
 .. image:: ../_static/enable_new_tp_through_admin_UI.png
 
 
 After you click on the **Save** button, the new language will be enabled for
-translation. In large projects it might take a bit to create the new
+translation. In large projects, it might take a bit to create the new
 translation files on disk and initialize the translations from the
 **Templates** language.
 
@@ -167,25 +174,36 @@ translation files on disk and initialize the translations from the
 Update strings for existing project
 -----------------------------------
 
-Whenever you update your software you might introduce new strings that require
-translation, or remove or change some of the previously existing strings.
-Independently of what happened, you will be generating a new
-:file:`templates.pot` if there is any string change.
+Often times, changes to language templates will be made in the software  or
+project which you are translating in Pootle. Developers may introduce new 
+strings or deprecate older ones. When this situation occurs, you will need
+to generate a new :file:`templates.pot` whenever there have been any changes 
+to the messages contained in the template file. After that, all of the 
+translation files on diskwill need to be updated, to bring the translations 
+into syncwith the templates, ensuring that new messages have been added, and 
+to remove  messages have been deprecated from the translation files. 
+Lastly, the Pootle translation database will need to be brought into sync with 
+the files located on the disk. We describe this process in the following steps.
 
-If that is the case you must place that file within your project's directory in
+First, you will need to ensure that your updated template file has been
+placed into the :setting:`POOTLE_TRANSLATION_DIRECTORY`.  
+Once you have recieved or generated the new :file:`templates.pot`
+place that file within your project's directory in
 :setting:`POOTLE_TRANSLATION_DIRECTORY`, replacing the file with the same name.
-Then run the following so Pootle picks up the new template changes:
+After that, invoke the following command which will update the template 
+translations in the Pootle database.
 
 .. code-block:: console
 
     $ pootle update_stores --project=my-project --language=templates
 
 
-This far you only got the updated templates with all the new changes into
-Pootle, where the removed strings are now gone, new strings have being added
-and changed strings have been pulled too.
+This command will ensure that new strings are added to the project and any
+strings which have been removed from the templates are marked as deprecated, and
+thus will not be available for translation. 
 
-Now you need to update the other languages in the project. The first step is to
+After the template language has been updated, each of the translation files 
+will need to be brought into sync with the template. The first step is to
 save to disk all the translations for the project that currently are in Pootle
 database:
 
@@ -194,9 +212,10 @@ database:
     $ pootle sync_stores --project=my-project
 
 
-Next step is to update all those translations against the newer templates. We
-recommend you to update them on disk using the :ref:`pot2po <toolkit:pot2po>`
-command line tool, which can handle other formats besides Gettext PO.
+Once the translations on disk have been brought into sync with the database, we
+recommend you to update them using the :ref:`pot2po <toolkit:pot2po>`
+command line tool, which can handle other formats besides Gettext PO. Please
+refer to this commands documentation for details on how to use this command.
 
 .. code-block:: console
 
@@ -211,12 +230,13 @@ command line tool, which can handle other formats besides Gettext PO.
 
 
 Once that all the languages in the project are synchronized with the newer
-templates you can push them back to Pootle:
+templates you can then proceed to syncronize these with the Pootle database
+using the :djadmin:`update_stores` command.
 
 .. code-block:: console
 
     $ pootle update_stores --project=my-project
 
 
-.. note:: If your languages have a lot of translations you might want do the
-   update against newer templates language by language.
+.. note:: If your languages contain many translations you wish to perform
+   the update against newer templates  on a language by language basis.
